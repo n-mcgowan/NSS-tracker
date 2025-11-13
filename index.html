@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NSS Survey Progress</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a0033 0%, #4a1a7a 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 30px;
+            position: relative;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeInDown 1s ease;
+        }
+
+        .header h1 {
+            font-size: 4.5em;
+            color: #ffd700;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+            margin-bottom: 15px;
+        }
+
+        .header h2 {
+            font-size: 2.8em;
+            color: white;
+        }
+
+        .content-wrapper {
+            display: grid;
+            grid-template-columns: 600px 1fr;
+            gap: 80px;
+            align-items: center;
+            margin-bottom: 40px;
+            justify-items: start;
+        }
+
+        .progress-section {
+            animation: fadeInLeft 1s ease 0.3s both;
+        }
+
+        .thermometer-wrapper {
+            position: relative;
+            padding-left: 120px;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .markers {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 650px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px 0;
+        }
+
+        .marker {
+            font-size: 2em;
+            color: #ffd700;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .thermometer-container {
+            position: relative;
+            width: 400px;
+            height: 650px;
+            background: white;
+            border-radius: 50px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            overflow: hidden;
+            border: 8px solid #ffd700;
+        }
+
+        .thermometer-fill {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            background: linear-gradient(to top, #6a1b9a 0%, #9c27b0 50%, #ce93d8 100%);
+            transition: height 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 0 0 42px 42px;
+            overflow: visible;
+        }
+
+        .wave {
+            position: absolute;
+            top: -30px;
+            left: -5%;
+            width: 110%;
+            height: 60px;
+            background: radial-gradient(ellipse at center, rgba(206, 147, 216, 0.8) 0%, rgba(156, 39, 176, 0.6) 50%, transparent 70%);
+            border-radius: 50%;
+            animation: wave 3s ease-in-out infinite;
+        }
+
+        @keyframes wave {
+            0%, 100% { 
+                transform: translateY(0) scaleX(1);
+            }
+            50% { 
+                transform: translateY(-15px) scaleX(1.05);
+            }
+        }
+
+        .target-line {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: #ffd700;
+            top: 20%;
+            z-index: 2;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
+        }
+
+        .target-line::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0;
+            height: 0;
+            border-top: 8px solid transparent;
+            border-bottom: 8px solid transparent;
+            border-left: 12px solid #ffd700;
+        }
+
+        .target-label {
+            position: absolute;
+            left: calc(100% + 60px);
+            top: calc(20% - 35px);
+            background: #ffd700;
+            color: #1a0033;
+            padding: 20px 40px;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 2.2em;
+            box-shadow: 0 5px 20px rgba(255, 215, 0, 0.4);
+            animation: bounce 2s ease-in-out infinite;
+            white-space: nowrap;
+            z-index: 5;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
+        }
+
+        .percentage-display {
+            position: absolute;
+            left: calc(100% + 60px);
+            top: 50%;
+            transform: translateY(-50%);
+            font-weight: bold;
+            color: #ffd700;
+            text-shadow: 4px 4px 10px rgba(0,0,0,0.6);
+            z-index: 5;
+            animation: scaleIn 1s ease 0.5s both;
+            background: rgba(26, 0, 51, 0.9);
+            padding: 20px 40px;
+            border-radius: 20px;
+            border: 4px solid #ffd700;
+            text-align: center;
+        }
+        
+        .current-label {
+            font-size: 1.8em;
+            display: block;
+            color: white;
+            margin-bottom: 10px;
+        }
+        
+        .percentage-number {
+            font-size: 5em;
+        }
+
+        .qr-section {
+            text-align: center;
+            animation: fadeInRight 1s ease 0.5s both;
+            margin-left: 400px;
+        }
+
+        .qr-box {
+            background: white;
+            padding: 45px;
+            border-radius: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            border: 6px solid #ffd700;
+        }
+
+        .qr-code {
+            width: 380px;
+            height: 380px;
+            margin: 0 auto 25px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 20px;
+        }
+
+        .qr-code svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .scan-text {
+            color: #1a0033;
+            font-size: 2.2em;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .cta-text {
+            color: #6a1b9a;
+            font-size: 1.6em;
+            margin-top: 15px;
+        }
+
+        .footer {
+            text-align: center;
+            margin: 50px 0 30px 0;
+            animation: fadeInUp 1s ease 0.7s both;
+        }
+
+        .footer-emoji {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+        }
+
+        .footer-text {
+            font-size: 2em;
+            color: #ffd700;
+            margin-bottom: 25px;
+            font-weight: bold;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+
+        .stat-box {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 30px 60px;
+            border-radius: 20px;
+            border: 3px solid #ffd700;
+        }
+
+        .stat-value {
+            font-size: 4em;
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            font-size: 1.6em;
+            color: white;
+            margin-top: 10px;
+        }
+
+        .logo-section {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 35px;
+            padding: 80px 35px 40px 35px;
+            background: transparent;
+            border-radius: 20px;
+            border: none;
+            flex-wrap: wrap;
+            position: relative;
+            overflow: visible;
+        }
+        
+        .logo-section::before {
+            display: none;
+        }
+
+        .logo-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            min-width: 140px;
+            height: 90px;
+            position: relative;
+            z-index: 1;
+            border: 3px solid #e0e0e0;
+        }
+
+        .logo-text {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #1a0033;
+            text-align: center;
+        }
+
+        .logo-ofs {
+            background: #f68b1f;
+            color: white !important;
+        }
+
+        .logo-nss {
+            background: #6a1b9a;
+            color: white !important;
+        }
+
+        .logo-ipsos {
+            background: #0066cc;
+            color: white !important;
+        }
+
+        .partnership-text {
+            display: none;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes fadeInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: translateY(-50%) scale(0);
+            }
+            to {
+                transform: translateY(-50%) scale(1);
+            }
+        }
+
+        .sparkles {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+            top: 0;
+            left: 0;
+        }
+
+        .sparkle {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #ffd700;
+            border-radius: 50%;
+            animation: sparkle 3s ease-in-out infinite;
+            opacity: 0;
+            box-shadow: 0 0 10px #ffd700;
+        }
+
+        @keyframes sparkle {
+            0%, 100% { opacity: 0; transform: scale(0) rotate(0deg); }
+            50% { opacity: 1; transform: scale(1) rotate(180deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="sparkles" id="sparkles"></div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>NSS Survey Progress</h1>
+            <h2>How Are We Doing? 🎯</h2>
+        </div>
+
+        <div class="content-wrapper">
+            <div class="progress-section">
+                <div class="thermometer-wrapper">
+                    <div class="markers">
+                        <div class="marker">100%</div>
+                        <div class="marker">75%</div>
+                        <div class="marker">50%</div>
+                        <div class="marker">25%</div>
+                        <div class="marker">0%</div>
+                    </div>
+                    <div class="thermometer-container">
+                        <div class="thermometer-fill" id="thermometer">
+                            <div class="wave"></div>
+                        </div>
+                        <div class="target-line"></div>
+                    </div>
+                    <div class="target-label">🎯 80% TARGET</div>
+                    <div class="percentage-display" id="percentage">
+                        <span class="current-label">Current</span>
+                        <span class="percentage-number">0%</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="qr-section">
+                <div class="qr-box">
+                    <div class="scan-text">Haven't completed yet?</div>
+                    <div class="qr-code">
+                        <svg width="100%" height="100%" viewBox="0 0 29 29" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="29" height="29" fill="white"/>
+                            <path d="M0,0h7v7h-7z M8,0h1v1h-1z M10,0h2v1h-2z M14,0h1v1h1v1h-1v1h-1v-1h-1v-1h1z M16,0h2v1h-2z M19,0h3v1h-3z M22,0h7v7h-7z M1,1v5h5v-5z M10,1h1v1h-1z M18,1h1v2h1v-1h1v2h-1v1h-2v-1h1v-1h-1z M23,1v5h5v-5z M2,2h3v3h-3z M11,2h1v1h-1z M13,2h1v2h-1z M24,2h3v3h-3z M9,3h1v2h-1z M16,3h2v1h-2z M8,4h1v1h-1z M19,4h1v1h-1z M12,5h1v2h1v-1h2v1h-1v1h-1v1h-1v-2h-1z M15,5h1v1h-1z M17,5h2v1h-2z M0,6h1v1h-1z M20,6h1v1h-1z M0,8h1v2h2v1h-2v1h-1v-1h1v-2h-1z M2,8h1v1h2v2h-2v-1h-1z M4,8h3v1h1v1h-1v1h-1v-2h-2z M9,8h3v1h-1v1h-1v-1h-1z M13,8h1v1h-1z M15,8h3v1h-1v1h-1v-1h-1z M19,8h2v1h-2z M22,8h1v1h1v1h-1v1h-1v-2h-1v1h-1v-1h1v-1h1z M25,8h1v1h-1z M27,8h2v2h-2z M5,9h2v1h-2z M12,9h1v3h-1z M20,9h1v1h-1z M26,9h1v2h-1z M3,10h1v1h-1z M8,10h3v1h-1v1h-2z M18,10h1v1h-1z M24,10h1v2h-1z M1,11h1v1h-1z M16,11h2v1h-1v1h-1z M19,11h1v1h1v1h-1v-1h-1z M21,11h2v1h1v1h-1v1h-1v-2h-1z M27,11h2v1h-2z M4,12h1v1h-1z M6,12h2v1h1v2h-1v-1h-2z M13,12h2v2h1v-1h1v2h-1v2h-1v-1h-1v1h-2v-1h1v-1h-1v-2h1z M25,12h1v1h-1z M1,13h1v1h-1z M3,13h1v2h-2v-1h1z M9,13h3v1h-3z M20,13h2v1h-2z M26,13h1v1h-1z M28,13h1v2h-1z M10,14h1v1h-1z M18,14h1v2h-1z M22,14h2v1h-2z M27,14h1v1h-1z M5,15h4v1h-1v1h-1v1h-1v-2h-1z M16,15h1v1h-1z M20,15h1v1h-1z M24,15h2v1h1v1h-3z M0,16h2v1h-1v1h-1z M4,16h1v1h-1z M10,16h2v1h-2z M21,16h1v1h-1z M1,17h1v1h-1z M11,17h1v1h-1z M19,17h1v2h-1z M22,17h1v1h-1z M27,17h1v1h-1z M2,18h1v1h-1z M4,18h1v1h-1z M9,18h2v1h-2z M12,18h2v1h2v1h-1v1h-1v-2h-2z M16,18h1v1h-1z M21,18h3v1h-3z M25,18h2v2h-2z M28,18h1v3h-1z M0,19h1v1h-1z M6,19h3v1h-1v1h-2z M17,19h1v1h-1z M20,19h1v1h-1z M0,20h1v1h-1z M3,20h2v1h-1v1h-2v-1h1z M8,20h1v1h-1z M10,20h1v1h-1z M15,20h1v1h1v1h-2z M22,20h3v1h-3z M26,20h1v1h-1z M5,21h1v2h1v-1h1v1h1v1h-1v1h-1v1h-2v-1h1v-1h-1z M9,21h1v1h-1z M11,21h3v1h-3z M17,21h2v1h-1v1h-1z M20,21h2v1h-2z M24,21h2v1h1v1h-1v1h-1v-2h-1z M0,22h7v7h-7z M9,22h1v1h-1z M19,22h1v1h-1z M1,23v5h5v-5z M8,23h1v3h-1v1h-1v-1h1v-2h-1v1h-1v-3h2z M10,23h1v1h-1z M13,23h2v1h-2z M20,23h2v1h-2z M27,23h2v1h-2z M2,24h3v3h-3z M17,24h1v1h-1z M22,24h1v2h-1z M26,24h1v1h-1z M11,25h3v1h-1v1h-1v1h-1z M15,25h2v1h-1v1h-1z M18,25h1v1h-1z M23,25h1v1h-1z M25,25h2v1h-2z M28,25h1v1h-1z M19,26h1v1h-1z M21,26h1v3h-1z M27,26h2v1h-2z M8,27h2v1h1v1h-2v-1h-1z M17,27h1v1h-1z M19,27h1v1h-1z M22,27h5v1h-1v1h-2v-1h-2z M28,27h1v2h-1z M10,28h1v1h-1z M12,28h4v1h-4z" fill="#6a1b9a"/>
+                        </svg>
+                    </div>
+                    <div class="cta-text">Scan to complete the NSS survey!</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="footer-emoji">📊</div>
+            <div class="footer-text">Weekly Progress Update</div>
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="stat-value" id="daysLeft">0</div>
+                    <div class="stat-label">Days Left</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="logo-section">
+            <div class="logo-item logo-ofs">
+                <div class="logo-text" style="color: white;">OfS</div>
+            </div>
+            <div class="logo-item">
+                <div class="logo-text">DfE</div>
+            </div>
+            <div class="logo-item logo-ipsos">
+                <div class="logo-text" style="color: white;">Ipsos</div>
+            </div>
+            <div class="logo-item logo-nss">
+                <div class="logo-text" style="color: white;">NSS</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========================================
+        // EDIT THESE VALUES WEEKLY
+        // ========================================
+        const currentPercentage = 45; // Current completion percentage
+        const daysRemaining = 45; // Days until deadline
+        // ========================================
+
+        // Update days left display
+        document.getElementById('daysLeft').textContent = daysRemaining;
+
+        // Animate thermometer fill
+        function animateProgress() {
+            const thermometer = document.getElementById('thermometer');
+            const percentageNumber = document.querySelector('.percentage-number');
+            
+            setTimeout(() => {
+                thermometer.style.height = currentPercentage + '%';
+            }, 500);
+
+            // Animate percentage counter
+            let current = 0;
+            const increment = currentPercentage / 60;
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= currentPercentage) {
+                    current = currentPercentage;
+                    clearInterval(timer);
+                }
+                percentageNumber.textContent = Math.round(current) + '%';
+            }, 30);
+        }
+
+        // Create sparkle effects
+        function createSparkles() {
+            const container = document.getElementById('sparkles');
+            for (let i = 0; i < 20; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle';
+                sparkle.style.left = Math.random() * 100 + '%';
+                sparkle.style.top = Math.random() * 100 + '%';
+                sparkle.style.animationDelay = Math.random() * 3 + 's';
+                container.appendChild(sparkle);
+            }
+        }
+
+        // Initialize on page load
+        window.addEventListener('load', () => {
+            animateProgress();
+            createSparkles();
+        });
+    </script>
+</body>
+</html>
